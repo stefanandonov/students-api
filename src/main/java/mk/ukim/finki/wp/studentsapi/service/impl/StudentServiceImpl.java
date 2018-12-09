@@ -63,6 +63,18 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    public Student addStudent(Student student) throws ParameterMissingException, IndexNotValidException, StudyProgramNotFoundException {
+        if (student.getName()==null || student.getLastName()==null || student.getStudyProgram().getName()==null)
+            throw new ParameterMissingException(0);
+
+        if (!checkIndexValidity(student.getIndex()))
+            throw new IndexNotValidException(student.getIndex());
+        if (studyProgramRepository.findAll().stream().filter(x -> x.getName().equals(student.getStudyProgram().getName())).count()==0)
+            throw new StudyProgramNotFoundException("",student.getStudyProgram().getName());
+        return null;
+    }
+
+    @Override
     public Student editStudent(String index, String name, String lastName, String studyProgramName) throws StudentNotFoundException {
         if (studentRepository.getStudentByIndex(index)==null)
             throw new StudentNotFoundException("",index);
