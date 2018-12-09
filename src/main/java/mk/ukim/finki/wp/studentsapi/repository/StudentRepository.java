@@ -1,23 +1,20 @@
 package mk.ukim.finki.wp.studentsapi.repository;
 
 import mk.ukim.finki.wp.studentsapi.model.Student;
-import mk.ukim.finki.wp.studentsapi.model.exceptions.StudentNotFoundException;
+import mk.ukim.finki.wp.studentsapi.model.dto.StudentDTO;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface StudentRepository  {
+public interface StudentRepository extends JpaRepository<Student, String> {
 
-    List<Student> findAll ();
+    @Query("select new mk.ukim.finki.wp.studentsapi.model.dto.StudentDTO(s.index, s.name, s.lastName) from Student s")
+    List<StudentDTO> findAllWithoutStudyProgram();
 
-    Student getStudentByIndex (String index) ;
+    List<Student> findAllByStudyProgramId(Long id);
 
-    List<Student> getStudentsByStudyProgram (Long id);
-
-    Student addStudent (String index, String name, String lastName, String studyProgramName);
-
-    Student deleteByIndex (String index);
-
-    Student updateStudent (String index, String name, String lastName, String studyProgramName);
-
+    Optional<Student> findByIndex(String index);
 
 }

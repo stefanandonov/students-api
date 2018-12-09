@@ -1,8 +1,7 @@
 package mk.ukim.finki.wp.studentsapi.web.rest;
 
 import mk.ukim.finki.wp.studentsapi.model.StudyProgram;
-import mk.ukim.finki.wp.studentsapi.service.StudentService;
-import org.springframework.beans.factory.annotation.Autowired;
+import mk.ukim.finki.wp.studentsapi.service.StudyProgramService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -13,28 +12,37 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/study_programs", produces = MediaType.APPLICATION_JSON_VALUE)
 public class StudyProgramResource {
-    private final StudentService studentService;
+    private final StudyProgramService studyProgramService;
 
-    @Autowired
-    public StudyProgramResource(StudentService studentService) {
-        this.studentService = studentService;
+    public StudyProgramResource(StudyProgramService studyProgramService) {
+        this.studyProgramService = studyProgramService;
     }
+
 
     @GetMapping
     public List<StudyProgram> getAllStudyPrograms () {
-        return studentService.getAllStudyPrograms();
+        return studyProgramService.findAll();
+    }
+
+
+    @GetMapping("/{id}")
+    StudyProgram getStudyProgramById(@PathVariable Long id) {
+        return studyProgramService.findById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public List<StudyProgram> addNewStudyProgram (@RequestBody String name, HttpServletResponse response)   {
+    public StudyProgram addNewStudyProgram (@RequestParam String name, HttpServletResponse response)   {
 
-        studentService.createStudyProgram(name);
+        StudyProgram sp = studyProgramService.save(name);
         response.setStatus(201);
         response.setHeader("Location", "/study_programs");
-        return studentService.getAllStudyPrograms();
+        return sp;
     }
 
-    //@DeleteMapping
+    @DeleteMapping("/{id}")
+    public void deleteStudyProgramById(@PathVariable Long id) {
+        this.studyProgramService.delete(id);
+    }
 
 }

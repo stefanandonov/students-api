@@ -2,10 +2,8 @@ package mk.ukim.finki.wp.studentsapi.service.impl;
 
 import mk.ukim.finki.wp.studentsapi.model.Student;
 import mk.ukim.finki.wp.studentsapi.model.StudyProgram;
-import mk.ukim.finki.wp.studentsapi.model.exceptions.IndexNotValidException;
-import mk.ukim.finki.wp.studentsapi.model.exceptions.ParameterMissingException;
-import mk.ukim.finki.wp.studentsapi.model.exceptions.StudentNotFoundException;
-import mk.ukim.finki.wp.studentsapi.model.exceptions.StudyProgramNotFoundException;
+import mk.ukim.finki.wp.studentsapi.model.dto.StudentDTO;
+import mk.ukim.finki.wp.studentsapi.model.exceptions.*;
 import mk.ukim.finki.wp.studentsapi.repository.StudentRepository;
 import mk.ukim.finki.wp.studentsapi.repository.StudyProgramRepository;
 import mk.ukim.finki.wp.studentsapi.service.StudentService;
@@ -24,76 +22,77 @@ public class StudentServiceImpl implements StudentService {
         this.studyProgramRepository = studyProgramRepository;
     }
 
-    private boolean checkIndexValidity (String index) {
-        for (char c:
+    private boolean checkIndexValidity(String index) {
+        for (char c :
                 index.toCharArray()) {
             if (!Character.isDigit(c))
                 return false;
         }
 
-        return index.length()==6;
+        return index.length() == 6;
 
     }
 
     @Override
-    public List<Student> getAllStudents() {
-        return studentRepository.findAll();
+    public List<StudentDTO> getAllStudents() {
+        return studentRepository.findAllWithoutStudyProgram();
     }
 
     @Override
     public Student getStudent(String index) throws StudentNotFoundException {
-        return studentRepository.getStudentByIndex(index);
+        return studentRepository.findByIndex(index).orElseThrow(() -> new StudentNotFoundException("Student is not found!", index));
     }
 
     @Override
     public List<Student> getStudentsByStudyProgram(Long id) {
-        return studentRepository.getStudentsByStudyProgram(id);
+        return studentRepository.findAllByStudyProgramId(id);
     }
 
     @Override
     public Student addStudent(String index, String name, String lastName, String studyProgramName) throws IndexNotValidException, StudyProgramNotFoundException, ParameterMissingException {
-        if (name==null || lastName==null || studyProgramName==null)
+        if (name == null || lastName == null || studyProgramName == null)
             throw new ParameterMissingException(0);
 
         if (!checkIndexValidity(index))
             throw new IndexNotValidException(index);
-        if (studyProgramRepository.findAll().stream().filter(x -> x.getName().equals(studyProgramName)).count()==0)
-            throw new StudyProgramNotFoundException("",studyProgramName);
-        return studentRepository.addStudent(index,name,lastName,studyProgramName);
+
+        StudyProgram sp = studyProgramRepository.findByName(studyProgramName).orElseThrow(() -> new StudyProgramNotFoundException("", studyProgramName));
+        return studentRepository.save(new Student(index, name, lastName, sp));
     }
 
     @Override
     public Student addStudent(Student student) throws ParameterMissingException, IndexNotValidException, StudyProgramNotFoundException {
-        if (student.getName()==null || student.getLastName()==null || student.getStudyProgram().getName()==null)
+        if (student.getName() == null || student.getLastName() == null || student.getStudyProgram().getName() == null)
             throw new ParameterMissingException(0);
 
         if (!checkIndexValidity(student.getIndex()))
             throw new IndexNotValidException(student.getIndex());
-        if (studyProgramRepository.findAll().stream().filter(x -> x.getName().equals(student.getStudyProgram().getName())).count()==0)
-            throw new StudyProgramNotFoundException("",student.getStudyProgram().getName());
+        if (studyProgramRepository.findAll().stream().noneMatch(x -> x.getName().equals(student.getStudyProgram().getName())))
+            throw new StudyProgramNotFoundException("", student.getStudyProgram().getName());
         return null;
     }
 
     @Override
     public Student editStudent(String index, String name, String lastName, String studyProgramName) throws StudentNotFoundException {
-        if (studentRepository.getStudentByIndex(index)==null)
-            throw new StudentNotFoundException("",index);
+        Student student = getStudent(index);
 
-        return studentRepository.updateStudent(index,name,lastName,studyProgramName);
+        if (studyProgramName != null) {
+            StudyProgram sp = studyProgramRepository.findByName(studyProgramName).orElseThrow(() -> new StudyProgramNotFoundInUpdatingStudentException("Study program not found!"));
+            student.setStudyProgram(sp);
+        }
+        if (name != null) {
+            student.setName(name);
+        }
+        if (lastName != null) {
+            student.setLastName(lastName);
+        }
+        return this.studentRepository.save(student);
     }
 
     @Override
-    public Student deleteStudent(String index) {
-        return studentRepository.deleteByIndex(index);
+    public void deleteStudent(String index) throws StudentNotFoundException {
+        studentRepository.findByIndex(index).orElseThrow(() -> new StudentNotFoundException("Student not found!", index));
+        studentRepository.deleteById(index);
     }
 
-    @Override
-    public List<StudyProgram> getAllStudyPrograms() {
-        return studyProgramRepository.findAll();
-    }
-
-    @Override
-    public StudyProgram createStudyProgram(String studyProgramName) {
-        return studyProgramRepository.save(studyProgramName);
-    }
 }

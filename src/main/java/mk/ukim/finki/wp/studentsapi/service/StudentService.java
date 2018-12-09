@@ -1,5 +1,6 @@
 package mk.ukim.finki.wp.studentsapi.service;
 import mk.ukim.finki.wp.studentsapi.model.*;
+import mk.ukim.finki.wp.studentsapi.model.dto.StudentDTO;
 import mk.ukim.finki.wp.studentsapi.model.exceptions.IndexNotValidException;
 import mk.ukim.finki.wp.studentsapi.model.exceptions.ParameterMissingException;
 import mk.ukim.finki.wp.studentsapi.model.exceptions.StudentNotFoundException;
@@ -8,7 +9,7 @@ import mk.ukim.finki.wp.studentsapi.model.exceptions.StudyProgramNotFoundExcepti
 import java.util.*;
 
 public interface StudentService {
-    List<Student> getAllStudents();
+    List<StudentDTO> getAllStudents();
 
     Student getStudent (String index) throws StudentNotFoundException;
 
@@ -19,11 +20,7 @@ public interface StudentService {
     Student addStudent (Student student) throws ParameterMissingException, IndexNotValidException, StudyProgramNotFoundException;
     Student editStudent (String index, String name, String lastName, String studyProgramName) throws StudentNotFoundException;
 
-    Student deleteStudent (String index);
-
-    List<StudyProgram> getAllStudyPrograms();
-
-    StudyProgram createStudyProgram(String studyProgramName);
+    void deleteStudent (String index) throws StudentNotFoundException;
 
 
 }

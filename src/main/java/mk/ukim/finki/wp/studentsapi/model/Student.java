@@ -1,18 +1,40 @@
 package mk.ukim.finki.wp.studentsapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 
 @Entity
-//@Table(name = "students")
+@Table(name = "a_studentss")
 public class Student {
 
     @Id
+    @Column(name = "student_index")
     private String index;
+
+    @Column(name = "student_name")
     private String name;
+
+    @Column(name = "student_last_name")
     private String lastName;
 
     @ManyToOne
     private StudyProgram studyProgram;
+
+    public Student() {}
+
+    public Student(String index, String name, String lastName, StudyProgram studyProgram) {
+        this.index = index;
+        this.name = name;
+        this.lastName = lastName;
+        this.studyProgram = studyProgram;
+    }
+
+    public Student(String index, String name, String lastName) {
+        this.index = index;
+        this.name = name;
+        this.lastName = lastName;
+    }
 
     public String getIndex() {
         return index;

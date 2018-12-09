@@ -1,6 +1,7 @@
 package mk.ukim.finki.wp.studentsapi.web.rest;
 
 import mk.ukim.finki.wp.studentsapi.model.Student;
+import mk.ukim.finki.wp.studentsapi.model.dto.StudentDTO;
 import mk.ukim.finki.wp.studentsapi.model.exceptions.IndexNotValidException;
 import mk.ukim.finki.wp.studentsapi.model.exceptions.ParameterMissingException;
 import mk.ukim.finki.wp.studentsapi.model.exceptions.StudentNotFoundException;
@@ -27,46 +28,47 @@ public class StudentResource {
 
 
     @GetMapping
-    public List<Student> getStudents() {
+    public List<StudentDTO> getStudents() {
         return studentService.getAllStudents();
     }
 
     @GetMapping("/{index}")
-    public Student getStudentByIndex (@PathVariable("index") String index) throws StudentNotFoundException {
+    public Student getStudentByIndex(@PathVariable("index") String index) throws StudentNotFoundException {
         return studentService.getStudent(index);
     }
 
     @GetMapping("/by_study_program/{id}")
-    public List<Student> getStudentByStudyProgramId (@PathVariable("id") Long id)  {
+    public List<Student> getStudentByStudyProgramId(@PathVariable("id") Long id) {
         return studentService.getStudentsByStudyProgram(id);
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public List<Student> addNewStudent (@RequestBody Student student, HttpServletResponse response) {
-        try {
-            Student newStudent = studentService.addStudent(student);
-            response.setHeader("Location", "/students/"+student.getIndex());
-            response.setStatus(201);
-            return studentService.getAllStudents();
-        } catch (ParameterMissingException e) {
-            e.printStackTrace();
-            /* response.getOutputStream().write() */
-            response.setStatus(400);
-        } catch (IndexNotValidException e) {
-            e.printStackTrace();
-            response.setStatus(400);
-        } catch (StudyProgramNotFoundException e) {
-            e.printStackTrace();
-            response.setStatus(400);
-        }
+    public Student addNewStudent(@RequestParam String index,
+                                 @RequestParam(required = false) String name,
+                                 @RequestParam(required = false) String lastName,
+                                 @RequestParam(required = false) String studyProgramName,
+                                 HttpServletResponse response) throws ParameterMissingException, IndexNotValidException {
 
-        return studentService.getAllStudents();
+        Student newStudent = studentService.addStudent(index, name, lastName, studyProgramName);
+        response.setHeader("Location", "/students/" + index);
+        response.setStatus(201);
+        return newStudent;
+
     }
 
+    @PatchMapping("/{index}")
+    public Student updateNewStudent(@PathVariable String index,
+                                    @RequestParam(required = false) String name,
+                                    @RequestParam(required = false) String lastName,
+                                    @RequestParam(required = false) String studyProgramName
+    ) throws StudentNotFoundException {
+        return this.studentService.editStudent(index, name, lastName, studyProgramName);
+    }
 
-
-
+    @DeleteMapping("/{index}")
+    public void deleteStudent(@PathVariable String index) throws StudentNotFoundException {
+        this.studentService.deleteStudent(index);
+    }
 
 
 }
