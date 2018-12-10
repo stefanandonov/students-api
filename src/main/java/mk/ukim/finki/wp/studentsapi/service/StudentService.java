@@ -17,7 +17,7 @@ public interface StudentService {
 
     Student addStudent (String index, String name, String lastName, String studyProgramName) throws IndexNotValidException, StudyProgramNotFoundException, ParameterMissingException;
 
-    Student addStudent (Student student) throws ParameterMissingException, IndexNotValidException, StudyProgramNotFoundException;
+    //Student addStudent (Student student) throws ParameterMissingException, IndexNotValidException, StudyProgramNotFoundException;
     Student editStudent (String index, String name, String lastName, String studyProgramName) throws StudentNotFoundException;
 
     void deleteStudent (String index) throws StudentNotFoundException;

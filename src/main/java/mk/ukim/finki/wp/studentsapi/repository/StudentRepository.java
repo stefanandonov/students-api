@@ -17,4 +17,5 @@ public interface StudentRepository extends JpaRepository<Student, String> {
 
     Optional<Student> findByIndex(String index);
 
+
 }

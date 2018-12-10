@@ -8,11 +8,11 @@ public class IndexNotValidException extends RuntimeException {
     private String index;
 
     public IndexNotValidException(String index){
+
+        super(index+" is not valid");
         this.index=index;
     }
 
-    public void message() {
-        System.out.println(index+" is not valid");
-    }
+
 
 }

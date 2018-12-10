@@ -11,10 +11,10 @@ public class ParameterMissingException extends Exception {
     private int parametersCount;
 
     public ParameterMissingException(int parametersCount){
+        super (String
+                .format("%d parameters are missing\n", 3-parametersCount));
         this.parametersCount=parametersCount;
     }
 
-    public void message () {
-        System.out.println(String.format("You have entered %d parameters, but you need to enter 4 parameters\n", this.parametersCount));
-    }
+
 }

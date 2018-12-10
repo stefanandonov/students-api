@@ -29,7 +29,7 @@ public class StudyProgramServiceImpl implements StudyProgramService {
 
     @Override
     public StudyProgram findByStudyProgramName(String name) {
-        return studyProgramRepository.findByName(name).orElseThrow(() -> new StudyProgramNotFoundException("Study program is not found!", name));
+        return studyProgramRepository.findByName(name).orElseThrow(() -> new StudyProgramNotFoundException( name));
     }
 
     @Override

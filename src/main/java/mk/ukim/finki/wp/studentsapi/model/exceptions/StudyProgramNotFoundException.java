@@ -8,11 +8,9 @@ public class StudyProgramNotFoundException extends RuntimeException {
 
     private String studyProgramName;
 
-    public StudyProgramNotFoundException(String message) {
-        super(message);
-    }
 
-    public StudyProgramNotFoundException(String message, String studyProgramName) {
+
+    public StudyProgramNotFoundException(String studyProgramName) {
         super(studyProgramName+" does not exist");
         this.studyProgramName = studyProgramName;
     }

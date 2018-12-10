@@ -33,6 +33,18 @@ public class StudentServiceImpl implements StudentService {
 
     }
 
+    private int countNullableVariables (String name, String lastName, String studyProgram) {
+        int counter= 0;
+        if (name==null)
+            ++counter;
+        if (lastName==null)
+            ++counter;
+        if (studyProgram==null)
+            ++counter;
+
+        return counter;
+    }
+
     @Override
     public List<StudentDTO> getAllStudents() {
         return studentRepository.findAllWithoutStudyProgram();
@@ -40,7 +52,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public Student getStudent(String index) throws StudentNotFoundException {
-        return studentRepository.findByIndex(index).orElseThrow(() -> new StudentNotFoundException("Student is not found!", index));
+        return studentRepository.findByIndex(index).orElseThrow(() -> new StudentNotFoundException(index));
     }
 
     @Override
@@ -50,34 +62,35 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public Student addStudent(String index, String name, String lastName, String studyProgramName) throws IndexNotValidException, StudyProgramNotFoundException, ParameterMissingException {
-        if (name == null || lastName == null || studyProgramName == null)
-            throw new ParameterMissingException(0);
+        if (name == null || lastName == null || studyProgramName == null){
+            throw new ParameterMissingException(countNullableVariables(name,lastName,studyProgramName));
+        }
 
         if (!checkIndexValidity(index))
             throw new IndexNotValidException(index);
 
-        StudyProgram sp = studyProgramRepository.findByName(studyProgramName).orElseThrow(() -> new StudyProgramNotFoundException("", studyProgramName));
+        StudyProgram sp = studyProgramRepository.findByName(studyProgramName).orElseThrow(() -> new StudyProgramNotFoundException(studyProgramName));
         return studentRepository.save(new Student(index, name, lastName, sp));
     }
 
-    @Override
-    public Student addStudent(Student student) throws ParameterMissingException, IndexNotValidException, StudyProgramNotFoundException {
-        if (student.getName() == null || student.getLastName() == null || student.getStudyProgram().getName() == null)
-            throw new ParameterMissingException(0);
-
-        if (!checkIndexValidity(student.getIndex()))
-            throw new IndexNotValidException(student.getIndex());
-        if (studyProgramRepository.findAll().stream().noneMatch(x -> x.getName().equals(student.getStudyProgram().getName())))
-            throw new StudyProgramNotFoundException("", student.getStudyProgram().getName());
-        return null;
-    }
+//    @Override
+//    public Student addStudent(Student student) throws ParameterMissingException, IndexNotValidException, StudyProgramNotFoundException {
+//        if (student.getName() == null || student.getLastName() == null || student.getStudyProgram().getName() == null)
+//            throw new ParameterMissingException(0);
+//
+//        if (!checkIndexValidity(student.getIndex()))
+//            throw new IndexNotValidException(student.getIndex());
+//        if (studyProgramRepository.findAll().stream().noneMatch(x -> x.getName().equals(student.getStudyProgram().getName())))
+//            throw new StudyProgramNotFoundException(student.getStudyProgram().getName());
+//        return null;
+//    }
 
     @Override
     public Student editStudent(String index, String name, String lastName, String studyProgramName) throws StudentNotFoundException {
         Student student = getStudent(index);
 
         if (studyProgramName != null) {
-            StudyProgram sp = studyProgramRepository.findByName(studyProgramName).orElseThrow(() -> new StudyProgramNotFoundInUpdatingStudentException("Study program not found!"));
+            StudyProgram sp = studyProgramRepository.findByName(studyProgramName).orElseThrow(() -> new StudyProgramNotFoundException( studyProgramName));
             student.setStudyProgram(sp);
         }
         if (name != null) {
@@ -91,7 +104,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public void deleteStudent(String index) throws StudentNotFoundException {
-        studentRepository.findByIndex(index).orElseThrow(() -> new StudentNotFoundException("Student not found!", index));
+        studentRepository.findByIndex(index).orElseThrow(() -> new StudentNotFoundException(index));
         studentRepository.deleteById(index);
     }
 
